@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#0f1117"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Finanz — Finanzas Personales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #13161e;
+    --surface2: #1c2030;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f2f7;
+    --muted: #6b7280;
+    --accent: #6ee7b7;
+    --accent2: #818cf8;
+    --accent3: #fb923c;
+    --red: #f87171;
+    --green: #6ee7b7;
+    --yellow: #fbbf24;
+    --blue: #60a5fa;
+    --pink: #f472b6;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --modal-radius: 24px 24px 0 0;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  /* ── AUTH SCREEN ── */
+  #auth-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 2rem;
+    background: radial-gradient(ellipse at 30% 20%, rgba(110,231,183,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 80%, rgba(129,140,248,0.08) 0%, transparent 60%),
+                var(--bg);
+  }
+  .auth-logo {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+  }
+  .auth-tagline { color: var(--muted); font-size: 0.95rem; margin-bottom: 3rem; text-align: center; }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 2rem;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+  }
+  .auth-card h2 { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 0.5rem; }
+  .auth-card p { color: var(--muted); font-size: 0.875rem; margin-bottom: 1.5rem; }
+  .btn-google {
+    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+    width: 100%; padding: 0.875rem 1.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text); font-family: var(--font-body); font-size: 0.95rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-google:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
+  .btn-google svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+  /* ── APP SHELL ── */
+  #app { display: none; flex-direction: column; min-height: 100dvh; }
+  #app.visible { display: flex; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem;
+    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+    background: var(--bg);
+    position: sticky; top: 0; z-index: 100;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-logo { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; letter-spacing: -1px; color: var(--accent); }
+  .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 0.8rem; font-weight: 700;
+    color: #0a0c10; cursor: pointer; overflow: hidden;
+  }
+  .avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .space-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.3rem 0.75rem;
+    font-size: 0.8rem; color: var(--muted);
+    cursor: pointer; transition: all 0.2s;
+    max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .space-badge:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem;
+    padding-bottom: calc(80px + var(--safe-bottom));
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(10,12,16,0.92);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: var(--safe-bottom);
+    z-index: 100;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 0.75rem 0.5rem 0.6rem;
+    cursor: pointer; transition: all 0.2s;
+    gap: 4px; color: var(--muted); font-size: 0.7rem; font-family: var(--font-display);
+  }
+  .nav-item svg { width: 22px; height: 22px; transition: all 0.2s; }
+  .nav-item.active { color: var(--accent); }
+  .nav-item.active svg { filter: drop-shadow(0 0 6px rgba(110,231,183,0.5)); }
+
+  /* ── VIEWS ── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .card-sm { padding: 1rem; margin-bottom: 0.75rem; }
+  .card-title {
+    font-family: var(--font-display); font-size: 0.75rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.75rem;
+  }
+
+  /* ── BALANCE HERO ── */
+  .balance-hero {
+    background: linear-gradient(135deg, rgba(110,231,183,0.08) 0%, rgba(129,140,248,0.08) 100%);
+    border: 1px solid rgba(110,231,183,0.15);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .balance-hero::before {
+    content: '';
+    position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at center, rgba(110,231,183,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .balance-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; }
+  .balance-amount {
+    font-family: var(--font-display); font-size: 2.8rem; font-weight: 800;
+    letter-spacing: -2px; line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .balance-meta { display: flex; justify-content: center; gap: 1.5rem; margin-top: 1rem; }
+  .balance-meta-item { text-align: center; }
+  .balance-meta-item span { display: block; font-size: 0.75rem; color: var(--muted); }
+  .balance-meta-item strong { font-family: var(--font-display); font-size: 1rem; }
+
+  /* ── STATS GRID ── */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 1rem;
+  }
+  .stat-card .stat-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
+  .stat-card .stat-value { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; }
+  .stat-card .stat-label { font-size: 0.75rem; color: var(--muted); }
+
+  /* ── TYPOGRAPHY HELPERS ── */
+  .section-title {
+    font-family: var(--font-display); font-size: 1.1rem; font-weight: 700;
+    margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-title .btn-add {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent); color: #0a0c10;
+    border: none; cursor: pointer; font-size: 1.2rem; font-weight: 300;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s;
+  }
+  .section-title .btn-add:hover { transform: scale(1.1); }
+
+  /* ── TRANSACTION LIST ── */
+  .tx-item {
+    display: flex; align-items: center; gap: 0.875rem;
+    padding: 0.875rem 0; border-bottom: 1px solid var(--border);
+  }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-name { font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx-meta { font-size: 0.75rem; color: var(--muted); }
+  .tx-amount { font-family: var(--font-display); font-size: 0.95rem; font-weight: 700; white-space: nowrap; }
+  .tx-amount.positive { color: var(--green); }
+  .tx-amount.negative { color: var(--red); }
+
+  /* ── CATEGORY CHIPS ── */
+  .category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.75rem; }
+  .cat-chip {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    padding: 0.625rem 0.25rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer; transition: all 0.15s; font-size: 0.7rem; color: var(--muted);
+  }
+  .cat-chip span { font-size: 1.3rem; }
+  .cat-chip.selected { border-color: var(--accent); color: var(--accent); background: rgba(110,231,183,0.08); }
+
+  /* ── PROGRESS BARS ── */
+  .progress-bar { background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; margin-top: 0.4rem; }
+  .progress-fill { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+
+  /* ── PILLS / BADGES ── */
+  .badge {
+    display: inline-block; padding: 0.2rem 0.6rem;
+    border-radius: 99px; font-size: 0.7rem; font-weight: 600;
+    font-family: var(--font-display);
+  }
+  .badge-green { background: rgba(110,231,183,0.15); color: var(--green); }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .badge-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .badge-blue { background: rgba(96,165,250,0.15); color: var(--blue); }
+  .badge-purple { background: rgba(129,140,248,0.15); color: var(--accent2); }
+
+  /* ── INPUTS ── */
+  .form-group { margin-bottom: 1rem; }
+  .form-label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.4rem; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-input, .form-select {
+    width: 100%; padding: 0.875rem 1rem;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-family: var(--font-body); font-size: 0.95rem;
+    transition: border-color 0.2s; outline: none; -webkit-appearance: none;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--accent); }
+  .form-select option { background: var(--surface2); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .amount-input-wrap { position: relative; }
+  .amount-input-wrap .currency { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
+  .amount-input-wrap .form-input { padding-left: 2.5rem; }
+
+  /* ── BUTTONS ── */
+  .btn { padding: 0.875rem 1.5rem; border-radius: var(--radius-sm); border: none; cursor: pointer; font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+  .btn-primary { background: var(--accent); color: #0a0c10; width: 100%; margin-top: 0.5rem; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-danger { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+  .btn-sm { padding: 0.5rem 0.875rem; font-size: 0.8rem; border-radius: 8px; }
+
+  /* ── MODAL (bottom sheet) ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200; display: none; align-items: flex-end;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.open { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-sheet {
+    background: var(--surface);
+    border-radius: var(--modal-radius);
+    width: 100%; max-height: 92dvh;
+    overflow-y: auto;
+    padding: 1.5rem;
+    padding-bottom: calc(1.5rem + var(--safe-bottom));
+    animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 99px; margin: 0 auto 1.25rem; }
+  .modal-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; }
+  .modal-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+  .modal-actions .btn { flex: 1; }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; overflow-x: auto; padding-bottom: 2px; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 0.5rem 1rem; border-radius: 99px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); font-family: var(--font-display); font-size: 0.8rem; font-weight: 600;
+    cursor: pointer; white-space: nowrap; transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--accent); color: #0a0c10; border-color: var(--accent); }
+
+  /* ── GOALS ── */
+  .goal-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+  .goal-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+  .goal-emoji { font-size: 1.6rem; }
+  .goal-info { flex: 1; }
+  .goal-name { font-family: var(--font-display); font-weight: 700; }
+  .goal-amounts { font-size: 0.8rem; color: var(--muted); }
+  .goal-pct { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: var(--accent); }
+
+  /* ── BUDGET ITEM ── */
+  .budget-item { display: flex; flex-direction: column; padding: 0.875rem 0; border-bottom: 1px solid var(--border); }
+  .budget-item:last-child { border-bottom: none; }
+  .budget-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
+  .budget-name { font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+  .budget-amounts { font-size: 0.8rem; color: var(--muted); font-family: var(--font-display); }
+
+  /* ── CHART BARS ── */
+  .bar-chart { display: flex; align-items: flex-end; gap: 0.4rem; height: 100px; padding: 0 0.25rem; }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .bar { width: 100%; border-radius: 6px 6px 0 0; min-height: 4px; transition: height 0.5s ease; }
+  .bar-label { font-size: 0.6rem; color: var(--muted); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--muted); }
+  .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .empty-state p { font-size: 0.875rem; }
+
+  /* ── SPACE LIST ── */
+  .space-item {
+    display: flex; align-items: center; gap: 0.875rem;
+    padding: 0.875rem; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 0.5rem; cursor: pointer; transition: all 0.2s;
+  }
+  .space-item:hover { border-color: rgba(255,255,255,0.15); }
+  .space-item.current { border-color: var(--accent); }
+  .space-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .space-info { flex: 1; }
+  .space-name { font-weight: 500; font-size: 0.9rem; }
+  .space-role { font-size: 0.75rem; color: var(--muted); }
+
+  /* ── MISC ── */
+  .divider { height: 1px; background: var(--border); margin: 0.75rem 0; }
+  .text-muted { color: var(--muted); }
+  .text-sm { font-size: 0.85rem; }
+  .text-xs { font-size: 0.75rem; }
+  .flex-between { display: flex; align-items: center; justify-content: space-between; }
+  .gap-1 { gap: 0.5rem; }
+  .mt-1 { margin-top: 0.75rem; }
+  .mb-1 { margin-bottom: 0.75rem; }
+  .chip-selector { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .chip {
+    padding: 0.4rem 0.875rem; border-radius: 99px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted); font-size: 0.8rem; cursor: pointer; transition: all 0.15s;
+  }
+  .chip.active { background: rgba(110,231,183,0.12); border-color: var(--accent); color: var(--accent); }
+  .loading { display: flex; align-items: center; justify-content: center; min-height: 200px; color: var(--muted); font-size: 0.9rem; }
+  .action-row { display: flex; gap: 0.5rem; }
+  .icon-btn { width: 32px; height: 32px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; transition: all 0.15s; }
+  .icon-btn:hover { color: var(--text); }
+  .icon-btn.danger:hover { color: var(--red); border-color: rgba(248,113,113,0.3); }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: calc(80px + var(--safe-bottom) + 1rem);
+    left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 99px; padding: 0.75rem 1.25rem;
+    font-size: 0.875rem; color: var(--text);
+    z-index: 300; opacity: 0; transition: all 0.3s;
+    white-space: nowrap; pointer-events: none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ── MONTH SELECTOR ── */
+  .month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .month-nav span { font-family: var(--font-display); font-weight: 700; font-size: 1rem; }
+  .month-nav button { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+
+  /* ── INVITE SECTION ── */
+  .invite-box {
+    background: linear-gradient(135deg, rgba(129,140,248,0.1), rgba(244,114,182,0.1));
+    border: 1px solid rgba(129,140,248,0.2);
+    border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem;
+  }
+  .invite-title { font-family: var(--font-display); font-weight: 700; margin-bottom: 0.25rem; }
+  .invite-sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 1rem; }
+  .invite-code {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: var(--bg); border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+  }
+  .invite-code span { flex: 1; font-family: monospace; font-size: 1rem; letter-spacing: 2px; }
+  .copy-btn { background: var(--accent); color: #0a0c10; border: none; border-radius: 6px; padding: 0.4rem 0.75rem; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+
+  /* ── SUMMARY ROWS ── */
+  .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+  .summary-row:last-child { border-bottom: none; font-weight: 600; }
+  .summary-row .label { font-size: 0.875rem; color: var(--muted); }
+  .summary-row .value { font-family: var(--font-display); font-size: 0.95rem; }
+
+  @media (min-width: 480px) {
+    .main-content { max-width: 480px; margin: 0 auto; }
+    .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); border-radius: 24px 24px 0 0; }
+    .topbar { max-width: 480px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-logo">Finanz</div>
+  <p class="auth-tagline">Finanzas personales & compartidas</p>
+  <div class="auth-card">
+    <h2>Bienvenido</h2>
+    <p>Conecta con Google para acceder a tus espacios financieros</p>
+    <button class="btn-google" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuar con Google
+    </button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">Finanz</div>
+    <div class="topbar-right">
+      <div class="space-badge" onclick="openSpacesModal()" id="current-space-label">Personal</div>
+      <div class="avatar" id="user-avatar" onclick="openProfileModal()">?</div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- HOME -->
+    <div id="view-home" class="view active">
+      <div id="home-content"><div class="loading">Cargando...</div></div>
+    </div>
+    <!-- TRANSACCIONES -->
+    <div id="view-tx" class="view">
+      <div id="tx-content"><div class="loading">Cargando...</div></div>
+    </div>
+    <!-- METAS -->
+    <div id="view-goals" class="view">
+      <div id="goals-content"><div class="loading">Cargando...</div></div>
+    </div>
+    <!-- PRESUPUESTO -->
+    <div id="view-budget" class="view">
+      <div id="budget-content"><div class="loading">Cargando...</div></div>
+    </div>
+    <!-- REPORTES -->
+    <div id="view-reports" class="view">
+      <div id="reports-content"><div class="loading">Cargando...</div></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" onclick="switchView('home')" id="nav-home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Inicio
+    </div>
+    <div class="nav-item" onclick="switchView('tx')" id="nav-tx">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Movimientos
+    </div>
+    <div class="nav-item" onclick="switchView('goals')" id="nav-goals">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      Metas
+    </div>
+    <div class="nav-item" onclick="switchView('budget')" id="nav-budget">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      Presupuesto
+    </div>
+    <div class="nav-item" onclick="switchView('reports')" id="nav-reports">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Reportes
+    </div>
+  </nav>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-tx" onclick="closeModal('modal-tx', event)">
+  <div class="modal-sheet" onclick="e => e.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div id="modal-tx-content"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-goal" onclick="closeModal('modal-goal', event)">
+  <div class="modal-sheet"><div class="modal-handle"></div><div id="modal-goal-content"></div></div>
+</div>
+<div class="modal-overlay" id="modal-budget" onclick="closeModal('modal-budget', event)">
+  <div class="modal-sheet"><div class="modal-handle"></div><div id="modal-budget-content"></div></div>
+</div>
+<div class="modal-overlay" id="modal-spaces" onclick="closeModal('modal-spaces', event)">
+  <div class="modal-sheet"><div class="modal-handle"></div><div id="modal-spaces-content"></div></div>
+</div>
+<div class="modal-overlay" id="modal-profile" onclick="closeModal('modal-profile', event)">
+  <div class="modal-sheet"><div class="modal-handle"></div><div id="modal-profile-content"></div></div>
+</div>
+<div class="modal-overlay" id="modal-adjust" onclick="closeModal('modal-adjust', event)">
+  <div class="modal-sheet"><div class="modal-handle"></div><div id="modal-adjust-content"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect,
+  getRedirectResult, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, collection, addDoc, setDoc, updateDoc, deleteDoc, getDoc,
+  getDocs, query, where, orderBy, onSnapshot, serverTimestamp, writeBatch }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDUOmUE9SzvAwrpbjFMXpUY355kLJDkLxk",
+  authDomain: "my-first-project-e1def.firebaseapp.com",
+  projectId: "my-first-project-e1def",
+  storageBucket: "my-first-project-e1def.firebasestorage.app",
+  messagingSenderId: "224033314149",
+  appId: "1:224033314149:web:dc38356fc1e0ce41657d8c"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+// ── STATE ──
+let currentUser = null;
+let currentSpaceId = null;
+let currentSpaceName = 'Personal';
+let currentSpaceRole = 'owner';
+let spaceData = {};
+let txUnsubscribe = null;
+let goalUnsubscribe = null;
+let budgetUnsubscribe = null;
+let viewMonth = new Date();
+
+// ── CATEGORIES ──
+const INCOME_CATS = [
+  { id:'salary', icon:'💼', label:'Sueldo' },
+  { id:'freelance', icon:'💻', label:'Freelance' },
+  { id:'invest', icon:'📈', label:'Inversión' },
+  { id:'gift', icon:'🎁', label:'Regalo' },
+  { id:'other_in', icon:'💰', label:'Otro' },
+];
+const EXPENSE_CATS = [
+  { id:'food', icon:'🍔', label:'Comida' },
+  { id:'transport', icon:'🚌', label:'Transporte' },
+  { id:'home', icon:'🏠', label:'Hogar' },
+  { id:'health', icon:'💊', label:'Salud' },
+  { id:'entertainment', icon:'🎬', label:'Ocio' },
+  { id:'shopping', icon:'🛍️', label:'Compras' },
+  { id:'travel', icon:'✈️', label:'Viaje' },
+  { id:'education', icon:'📚', label:'Educación' },
+  { id:'savings', icon:'🏦', label:'Ahorro' },
+  { id:'kids', icon:'👶', label:'Niños' },
+  { id:'pets', icon:'🐾', label:'Mascotas' },
+  { id:'other_ex', icon:'📦', label:'Otro' },
+];
+const ALL_CATS = [...INCOME_CATS, ...EXPENSE_CATS];
+const catById = id => ALL_CATS.find(c => c.id === id) || { icon:'💳', label: id };
+
+// ── HELPERS ──
+const fmt = (n) => new Intl.NumberFormat('es-PA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(n || 0);
+const fmtShort = (n) => Math.abs(n) >= 1000 ? (n/1000).toFixed(1)+'k' : fmt(n);
+const fmtDate = (d) => {
+  if (!d) return '';
+  const dt = d.toDate ? d.toDate() : new Date(d);
+  return dt.toLocaleDateString('es-PA', { day:'2-digit', month:'short' });
+};
+const fmtMonth = (d) => d.toLocaleDateString('es-PA', { month:'long', year:'numeric' });
+const monthKey = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+const isSameMonth = (d, ref) => {
+  const dt = d.toDate ? d.toDate() : new Date(d);
+  return dt.getMonth() === ref.getMonth() && dt.getFullYear() === ref.getFullYear();
+};
+
+function showToast(msg, ms = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), ms);
+}
+
+function closeModal(id, event) {
+  if (event && event.target !== document.getElementById(id)) return;
+  document.getElementById(id).classList.remove('open');
+}
+window.closeModal = closeModal;
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+
+// ── AUTH ──
+window.signInWithGoogle = async () => {
+  const btn = document.querySelector('.btn-google');
+  if (btn) { btn.textContent = 'Conectando...'; btn.disabled = true; }
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    if (['auth/popup-blocked','auth/popup-closed-by-user','auth/cancelled-popup-request'].includes(e.code)) {
+      showToast('Redirigiendo a Google...');
+      await signInWithRedirect(auth, provider);
+    } else {
+      if (btn) { btn.innerHTML = `<svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg> Continuar con Google`; btn.disabled = false; }
+      showToast('Error: ' + (e.message || 'Intenta de nuevo'));
+    }
+  }
+};
+window.doSignOut = async () => {
+  if (txUnsubscribe) txUnsubscribe();
+  if (goalUnsubscribe) goalUnsubscribe();
+  await signOut(auth);
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+};
+
+// Handle redirect result first (for mobile/Netlify redirect flow)
+getRedirectResult(auth).then(result => {
+  if (result?.user) console.log('Redirect login OK:', result.user.email);
+}).catch(e => { if (e.code !== 'auth/no-auth-event') console.error('Redirect error', e); });
+
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    // Set avatar
+    const av = document.getElementById('user-avatar');
+    if (user.photoURL) av.innerHTML = `<img src="${user.photoURL}" alt="avatar"/>`;
+    else av.textContent = (user.displayName || 'U')[0].toUpperCase();
+    // Load spaces
+    await loadSpaces();
+  } else {
+    document.getElementById('auth-screen').style.display = 'flex';
+    document.getElementById('app').classList.remove('visible');
+  }
+});
+
+// ── SPACES ──
+async function loadSpaces() {
+  const spacesRef = collection(db, 'users', currentUser.uid, 'spaces');
+  let snap = await getDocs(spacesRef);
+  if (snap.empty) {
+    // Create default personal space
+    const ref = doc(spacesRef);
+    await setDoc(ref, {
+      name: 'Personal', type: 'personal', color: '#6ee7b7',
+      createdAt: serverTimestamp(), owner: currentUser.uid,
+      balance: 0, currency: 'USD'
+    });
+    snap = await getDocs(spacesRef);
+  }
+  // Also load shared spaces where user is member
+  const sharedQ = query(collection(db, 'sharedSpaces'), where('members', 'array-contains', currentUser.uid));
+  const sharedSnap = await getDocs(sharedQ);
+
+  const spaces = [];
+  snap.forEach(d => spaces.push({ id: d.id, ...d.data(), source: 'personal' }));
+  sharedSnap.forEach(d => {
+    const role = d.data().owner === currentUser.uid ? 'owner' : 'member';
+    spaces.push({ id: d.id, ...d.data(), source: 'shared', role });
+  });
+  spaceData = {};
+  spaces.forEach(s => spaceData[s.id] = s);
+
+  if (!currentSpaceId || !spaceData[currentSpaceId]) {
+    currentSpaceId = spaces[0].id;
+    currentSpaceName = spaces[0].name;
+    currentSpaceRole = spaces[0].role || 'owner';
+  }
+  document.getElementById('current-space-label').textContent = currentSpaceName;
+  subscribeData();
+}
+
+function getSpaceRef(col) {
+  const sp = spaceData[currentSpaceId];
+  if (sp?.source === 'shared') return collection(db, 'sharedSpaces', currentSpaceId, col);
+  return collection(db, 'users', currentUser.uid, 'spaces', currentSpaceId, col);
+}
+function getSpaceDocRef() {
+  const sp = spaceData[currentSpaceId];
+  if (sp?.source === 'shared') return doc(db, 'sharedSpaces', currentSpaceId);
+  return doc(db, 'users', currentUser.uid, 'spaces', currentSpaceId);
+}
+
+// ── SUBSCRIBE DATA ──
+let allTx = [], allGoals = [], allBudgets = [];
+
+function subscribeData() {
+  if (txUnsubscribe) txUnsubscribe();
+  if (goalUnsubscribe) goalUnsubscribe();
+  if (budgetUnsubscribe) budgetUnsubscribe();
+
+  txUnsubscribe = onSnapshot(query(getSpaceRef('transactions'), orderBy('date', 'desc')), snap => {
+    allTx = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    refreshCurrentView();
+  });
+  goalUnsubscribe = onSnapshot(getSpaceRef('goals'), snap => {
+    allGoals = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    refreshCurrentView();
+  });
+  budgetUnsubscribe = onSnapshot(getSpaceRef('budgets'), snap => {
+    allBudgets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    refreshCurrentView();
+  });
+}
+
+let currentView = 'home';
+window.switchView = (v) => {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  document.getElementById('nav-' + v).classList.add('active');
+  currentView = v;
+  refreshCurrentView();
+};
+
+function refreshCurrentView() {
+  if (currentView === 'home') renderHome();
+  else if (currentView === 'tx') renderTx();
+  else if (currentView === 'goals') renderGoals();
+  else if (currentView === 'budget') renderBudget();
+  else if (currentView === 'reports') renderReports();
+}
+
+// ── HOME ──
+function renderHome() {
+  const now = new Date();
+  const monthTx = allTx.filter(t => isSameMonth(t.date, now));
+  const income = monthTx.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
+  const expense = monthTx.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
+  const net = income - expense;
+  const sp = spaceData[currentSpaceId] || {};
+  const balance = sp.balance || 0;
+
+  // Recent tx
+  const recent = allTx.slice(0, 5);
+
+  document.getElementById('home-content').innerHTML = `
+    <div class="balance-hero">
+      <div class="balance-label">Balance total</div>
+      <div class="balance-amount">$${fmt(balance)}</div>
+      <div class="balance-meta">
+        <div class="balance-meta-item">
+          <span>Ingresos</span>
+          <strong style="color:var(--green)">$${fmtShort(income)}</strong>
+        </div>
+        <div class="balance-meta-item">
+          <span>Gastos</span>
+          <strong style="color:var(--red)">$${fmtShort(expense)}</strong>
+        </div>
+        <div class="balance-meta-item">
+          <span>Neto</span>
+          <strong style="color:${net>=0?'var(--green)':'var(--red)'}">${net>=0?'+':''}$${fmtShort(net)}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card" onclick="openAdjustModal()">
+        <div class="stat-icon">🏦</div>
+        <div class="stat-value">$${fmtShort(balance)}</div>
+        <div class="stat-label">Saldo disponible</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-value">${allTx.length}</div>
+        <div class="stat-label">Transacciones</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value">${allGoals.length}</div>
+        <div class="stat-label">Metas activas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💳</div>
+        <div class="stat-value">${allBudgets.length}</div>
+        <div class="stat-label">Presupuestos</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      Movimientos recientes
+      <button class="btn-add" onclick="openTxModal()">+</button>
+    </div>
+    <div class="card card-sm">
+      ${recent.length === 0 ? `<div class="empty-state"><div class="empty-icon">💸</div><p>Sin movimientos aún</p></div>` :
+        recent.map(t => renderTxItem(t, true)).join('')}
+    </div>
+
+    ${allGoals.length > 0 ? `
+    <div class="section-title">Metas <span style="font-size:0.75rem;color:var(--muted)">${allGoals.length}</span></div>
+    ${allGoals.slice(0,3).map(g => renderGoalCard(g)).join('')}` : ''}
+  `;
+}
+
+function renderTxItem(t, compact=false) {
+  const cat = catById(t.category);
+  const isIncome = t.type === 'income';
+  const bgColor = isIncome ? 'rgba(110,231,183,0.12)' : 'rgba(248,113,113,0.1)';
+  return `<div class="tx-item" ${!compact ? `data-id="${t.id}"` : ''}>
+    <div class="tx-icon" style="background:${bgColor}">${cat.icon}</div>
+    <div class="tx-info">
+      <div class="tx-name">${t.description || cat.label}</div>
+      <div class="tx-meta">${fmtDate(t.date)} · ${cat.label}${t.addedBy ? ` · ${t.addedBy}` : ''}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem">
+      <div class="tx-amount ${isIncome ? 'positive' : 'negative'}">${isIncome?'+':'-'}$${fmt(t.amount)}</div>
+      ${!compact ? `<button class="icon-btn danger" onclick="deleteTx('${t.id}')">🗑</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderGoalCard(g) {
+  const pct = Math.min(100, Math.round((g.current / g.target) * 100));
+  const colors = ['#6ee7b7','#818cf8','#fb923c','#60a5fa','#f472b6'];
+  const color = colors[allGoals.indexOf(g) % colors.length];
+  return `<div class="goal-item" onclick="openGoalDetail('${g.id}')">
+    <div class="goal-header">
+      <div class="goal-emoji">${g.emoji || '🎯'}</div>
+      <div class="goal-info">
+        <div class="goal-name">${g.name}</div>
+        <div class="goal-amounts">$${fmt(g.current)} / $${fmt(g.target)}</div>
+      </div>
+      <div class="goal-pct">${pct}%</div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:${pct}%;background:${color}"></div>
+    </div>
+  </div>`;
+}
+
+// ── TRANSACTIONS VIEW ──
+function renderTx() {
+  const monthTx = allTx.filter(t => isSameMonth(t.date, viewMonth));
+  const income = monthTx.filter(t => t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = monthTx.filter(t => t.type==='expense').reduce((s,t)=>s+t.amount,0);
+
+  let txByDate = {};
+  monthTx.forEach(t => {
+    const d = fmtDate(t.date);
+    if (!txByDate[d]) txByDate[d] = [];
+    txByDate[d].push(t);
+  });
+
+  document.getElementById('tx-content').innerHTML = `
+    <div class="month-nav">
+      <button onclick="prevMonth()">‹</button>
+      <span>${fmtMonth(viewMonth)}</span>
+      <button onclick="nextMonth()">›</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem">
+      <div class="card card-sm" style="margin:0;text-align:center">
+        <div style="color:var(--muted);font-size:0.75rem;margin-bottom:0.25rem">Ingresos</div>
+        <div style="font-family:var(--font-display);font-size:1.2rem;color:var(--green)">+$${fmt(income)}</div>
+      </div>
+      <div class="card card-sm" style="margin:0;text-align:center">
+        <div style="color:var(--muted);font-size:0.75rem;margin-bottom:0.25rem">Gastos</div>
+        <div style="font-family:var(--font-display);font-size:1.2rem;color:var(--red)">-$${fmt(expense)}</div>
+      </div>
+    </div>
+    <div class="section-title">
+      Movimientos
+      <button class="btn-add" onclick="openTxModal()">+</button>
+    </div>
+    ${Object.keys(txByDate).length === 0 ? `<div class="empty-state"><div class="empty-icon">📋</div><p>Sin movimientos este mes</p></div>` :
+      Object.entries(txByDate).map(([date, txs]) => `
+        <div style="font-size:0.78rem;color:var(--muted);font-family:var(--font-display);text-transform:uppercase;letter-spacing:1px;margin:0.75rem 0 0.4rem">${date}</div>
+        <div class="card card-sm">${txs.map(t => renderTxItem(t, false)).join('')}</div>
+      `).join('')
+    }
+  `;
+}
+
+window.prevMonth = () => { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth()-1, 1); renderTx(); };
+window.nextMonth = () => { viewMonth = new Date(viewMonth.getFullYear(), viewMonth.getMonth()+1, 1); renderTx(); };
+
+// ── GOALS VIEW ──
+function renderGoals() {
+  document.getElementById('goals-content').innerHTML = `
+    <div class="section-title">
+      Metas
+      <button class="btn-add" onclick="openGoalModal()">+</button>
+    </div>
+    ${allGoals.length === 0 ? `<div class="empty-state"><div class="empty-icon">🎯</div><p>Crea tu primera meta financiera</p></div>` :
+      allGoals.map(g => renderGoalCard(g)).join('')}
+  `;
+}
+
+// ── BUDGET VIEW ──
+function renderBudget() {
+  const now = new Date();
+  const monthTx = allTx.filter(t => isSameMonth(t.date, now) && t.type === 'expense');
+
+  document.getElementById('budget-content').innerHTML = `
+    <div class="section-title">
+      Presupuestos
+      <button class="btn-add" onclick="openBudgetModal()">+</button>
+    </div>
+    ${allBudgets.length === 0 ? `<div class="empty-state"><div class="empty-icon">💳</div><p>Define límites de gasto por categoría</p></div>` :
+      `<div class="card">` + allBudgets.map(b => {
+        const spent = monthTx.filter(t => t.category === b.category).reduce((s,t)=>s+t.amount,0);
+        const pct = Math.min(100, Math.round((spent/b.limit)*100));
+        const cat = catById(b.category);
+        const color = pct >= 100 ? 'var(--red)' : pct >= 80 ? 'var(--yellow)' : 'var(--green)';
+        return `<div class="budget-item">
+          <div class="budget-top">
+            <div class="budget-name">${cat.icon} ${b.name || cat.label}</div>
+            <div class="budget-amounts">$${fmt(spent)} / $${fmt(b.limit)}</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${pct}%;background:${color}"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:0.35rem">
+            <span class="text-xs text-muted">${pct}% usado</span>
+            <span class="text-xs" style="color:${color}">$${fmt(b.limit - spent)} restante</span>
+          </div>
+        </div>`;
+      }).join('') + `</div>`
+    }
+    <div class="section-title" style="margin-top:0.5rem">Gastos este mes</div>
+    ${EXPENSE_CATS.map(cat => {
+      const spent = monthTx.filter(t => t.category === cat.id).reduce((s,t)=>s+t.amount,0);
+      if (!spent) return '';
+      return `<div class="tx-item">
+        <div class="tx-icon" style="background:rgba(248,113,113,0.1)">${cat.icon}</div>
+        <div class="tx-info"><div class="tx-name">${cat.label}</div></div>
+        <div class="tx-amount negative">-$${fmt(spent)}</div>
+      </div>`;
+    }).filter(Boolean).join('') || `<div class="empty-state" style="padding:1.5rem"><p>Sin gastos este mes</p></div>`}
+  `;
+}
+
+// ── REPORTS VIEW ──
+function renderReports() {
+  const months = [];
+  for (let i=5; i>=0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    months.push(d);
+  }
+  const monthStats = months.map(m => {
+    const mtx = allTx.filter(t => isSameMonth(t.date, m));
+    return {
+      label: m.toLocaleDateString('es-PA', { month:'short' }),
+      income: mtx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0),
+      expense: mtx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0),
+    };
+  });
+  const maxVal = Math.max(...monthStats.map(m => Math.max(m.income, m.expense)), 1);
+
+  // Category breakdown (all time)
+  const byCat = {};
+  allTx.filter(t=>t.type==='expense').forEach(t => {
+    byCat[t.category] = (byCat[t.category]||0) + t.amount;
+  });
+  const sorted = Object.entries(byCat).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const totalExp = sorted.reduce((s,e)=>s+e[1],0);
+
+  document.getElementById('reports-content').innerHTML = `
+    <div class="section-title" style="margin-bottom:1rem">Últimos 6 meses</div>
+    <div class="card">
+      <div style="display:flex;align-items:flex-end;justify-content:space-around;height:120px;padding:0.5rem 0">
+        ${monthStats.map(m => `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex:1">
+            <div style="display:flex;align-items:flex-end;gap:2px;height:90px">
+              <div style="width:12px;border-radius:4px 4px 0 0;background:var(--green);height:${Math.round((m.income/maxVal)*90)}px;min-height:2px"></div>
+              <div style="width:12px;border-radius:4px 4px 0 0;background:var(--red);height:${Math.round((m.expense/maxVal)*90)}px;min-height:2px"></div>
+            </div>
+            <div style="font-size:0.65rem;color:var(--muted)">${m.label}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="display:flex;gap:1rem;justify-content:center;margin-top:0.5rem">
+        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:var(--green)"></div>Ingresos</div>
+        <div style="display:flex;align-items:center;gap:0.4rem;font-size:0.75rem;color:var(--muted)"><div style="width:10px;height:10px;border-radius:2px;background:var(--red)"></div>Gastos</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:0.5rem">Gastos por categoría</div>
+    <div class="card card-sm">
+      ${sorted.length === 0 ? `<div class="empty-state" style="padding:1.25rem"><p>Sin datos</p></div>` :
+        sorted.map(([catId, amt]) => {
+          const cat = catById(catId);
+          const pct = Math.round((amt/totalExp)*100);
+          return `<div class="budget-item">
+            <div class="budget-top">
+              <div class="budget-name">${cat.icon} ${cat.label}</div>
+              <div class="budget-amounts">${pct}% · $${fmt(amt)}</div>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--accent2)"></div></div>
+          </div>`;
+        }).join('')}
+    </div>
+
+    ${(() => {
+      const now = new Date();
+      const monthTx = allTx.filter(t => isSameMonth(t.date, now));
+      const income = monthTx.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+      const expense = monthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+      const savRate = income > 0 ? Math.round(((income-expense)/income)*100) : 0;
+      return `<div class="section-title" style="margin-top:0.5rem">Este mes</div>
+      <div class="card card-sm">
+        <div class="summary-row"><span class="label">Ingresos totales</span><span class="value" style="color:var(--green)">+$${fmt(income)}</span></div>
+        <div class="summary-row"><span class="label">Gastos totales</span><span class="value" style="color:var(--red)">-$${fmt(expense)}</span></div>
+        <div class="summary-row"><span class="label">Tasa de ahorro</span><span class="value" style="color:${savRate>=20?'var(--green)':savRate>=10?'var(--yellow)':'var(--red)'}">${savRate}%</span></div>
+        <div class="summary-row"><span class="label">Balance neto</span><span class="value" style="color:${income-expense>=0?'var(--green)':'var(--red)'}">${income-expense>=0?'+':'-'}$${fmt(Math.abs(income-expense))}</span></div>
+      </div>`;
+    })()}
+  `;
+}
+
+// ── TRANSACTION MODAL ──
+window.openTxModal = (prefill={}) => {
+  const isExpense = prefill.type !== 'income';
+  document.getElementById('modal-tx-content').innerHTML = `
+    <div class="modal-title">Nueva transacción</div>
+    <div class="chip-selector" style="margin-bottom:1rem">
+      <div class="chip ${isExpense?'':'active'}" onclick="setTxType('income', this)">💰 Ingreso</div>
+      <div class="chip ${isExpense?'active':''}" onclick="setTxType('expense', this)">💸 Gasto</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Monto</label>
+      <div class="amount-input-wrap">
+        <span class="currency">$</span>
+        <input class="form-input" id="tx-amount" type="number" placeholder="0.00" min="0" step="0.01" value="${prefill.amount||''}"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descripción (opcional)</label>
+      <input class="form-input" id="tx-desc" type="text" placeholder="Ej: Supermercado, Salario..." value="${prefill.description||''}"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Categoría</label>
+      <div id="cat-grid-expense" class="category-grid">
+        ${EXPENSE_CATS.map(c=>`<div class="cat-chip" onclick="selectCat('${c.id}',this)" data-id="${c.id}"><span>${c.icon}</span>${c.label}</div>`).join('')}
+      </div>
+      <div id="cat-grid-income" class="category-grid" style="display:none">
+        ${INCOME_CATS.map(c=>`<div class="cat-chip" onclick="selectCat('${c.id}',this)" data-id="${c.id}"><span>${c.icon}</span>${c.label}</div>`).join('')}
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha</label>
+      <input class="form-input" id="tx-date" type="date" value="${new Date().toISOString().split('T')[0]}"/>
+    </div>
+    <input type="hidden" id="tx-type" value="${isExpense?'expense':'income'}"/>
+    <input type="hidden" id="tx-cat" value="${prefill.category||''}"/>
+    <button class="btn btn-primary" onclick="saveTx()">Guardar movimiento</button>
+  `;
+  openModal('modal-tx');
+};
+window.setTxType = (type, el) => {
+  document.getElementById('tx-type').value = type;
+  document.querySelectorAll('#modal-tx-content .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('cat-grid-expense').style.display = type==='expense' ? 'grid' : 'none';
+  document.getElementById('cat-grid-income').style.display = type==='income' ? 'grid' : 'none';
+  document.getElementById('tx-cat').value = '';
+  document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
+};
+window.selectCat = (id, el) => {
+  document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('tx-cat').value = id;
+};
+window.saveTx = async () => {
+  const amount = parseFloat(document.getElementById('tx-amount').value);
+  const desc = document.getElementById('tx-desc').value.trim();
+  const type = document.getElementById('tx-type').value;
+  const cat = document.getElementById('tx-cat').value;
+  const dateStr = document.getElementById('tx-date').value;
+  if (!amount || amount <= 0) { showToast('Ingresa un monto válido'); return; }
+  if (!cat) { showToast('Selecciona una categoría'); return; }
+  const date = new Date(dateStr + 'T12:00:00');
+  try {
+    await addDoc(getSpaceRef('transactions'), {
+      amount, type, category: cat, description: desc,
+      date, createdAt: serverTimestamp(),
+      addedBy: currentUser.displayName || currentUser.email
+    });
+    // Update balance
+    const spRef = getSpaceDocRef();
+    const spSnap = await getDoc(spRef);
+    const bal = spSnap.data()?.balance || 0;
+    const newBal = type === 'income' ? bal + amount : bal - amount;
+    await updateDoc(spRef, { balance: newBal });
+    spaceData[currentSpaceId] = { ...spaceData[currentSpaceId], balance: newBal };
+    closeModal('modal-tx', {target:document.getElementById('modal-tx')});
+    showToast('✅ Movimiento guardado');
+  } catch(e) { showToast('Error al guardar'); console.error(e); }
+};
+window.deleteTx = async (id) => {
+  if (!confirm('¿Eliminar este movimiento?')) return;
+  const tx = allTx.find(t => t.id === id);
+  if (!tx) return;
+  try {
+    await deleteDoc(doc(getSpaceRef('transactions'), id));
+    const spRef = getSpaceDocRef();
+    const spSnap = await getDoc(spRef);
+    const bal = spSnap.data()?.balance || 0;
+    const newBal = tx.type === 'income' ? bal - tx.amount : bal + tx.amount;
+    await updateDoc(spRef, { balance: newBal });
+    spaceData[currentSpaceId] = { ...spaceData[currentSpaceId], balance: newBal };
+    showToast('Movimiento eliminado');
+  } catch(e) { showToast('Error al eliminar'); }
+};
+
+// ── GOALS MODAL ──
+const GOAL_EMOJIS = ['🎯','✈️','🏠','🚗','💍','🎓','💻','🏖️','👶','🏋️','🎸','🌍'];
+window.openGoalModal = (goal=null) => {
+  document.getElementById('modal-goal-content').innerHTML = `
+    <div class="modal-title">${goal ? 'Editar meta' : 'Nueva meta'}</div>
+    <div class="form-group">
+      <label class="form-label">Emoji</label>
+      <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:0.5rem">
+        ${GOAL_EMOJIS.map(e=>`<div class="chip ${(goal?.emoji||'🎯')===e?'active':''}" onclick="selectEmoji('${e}',this)" style="font-size:1.3rem;padding:0.4rem">${e}</div>`).join('')}
+      </div>
+      <input type="hidden" id="goal-emoji" value="${goal?.emoji||'🎯'}"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre de la meta</label>
+      <input class="form-input" id="goal-name" placeholder="Ej: Viaje a Europa" value="${goal?.name||''}"/>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Meta ($)</label>
+        <div class="amount-input-wrap"><span class="currency">$</span>
+          <input class="form-input" id="goal-target" type="number" placeholder="1000" value="${goal?.target||''}"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Actual ($)</label>
+        <div class="amount-input-wrap"><span class="currency">$</span>
+          <input class="form-input" id="goal-current" type="number" placeholder="0" value="${goal?.current||0}"/>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fecha objetivo (opcional)</label>
+      <input class="form-input" id="goal-date" type="date" value="${goal?.deadline||''}"/>
+    </div>
+    <div class="modal-actions">
+      ${goal ? `<button class="btn btn-danger btn-sm" onclick="deleteGoal('${goal.id}')">Eliminar</button>` : ''}
+      <button class="btn btn-primary" onclick="saveGoal('${goal?.id||''}')">Guardar meta</button>
+    </div>
+  `;
+  openModal('modal-goal');
+};
+window.selectEmoji = (e, el) => {
+  document.querySelectorAll('#modal-goal-content .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('goal-emoji').value = e;
+};
+window.openGoalDetail = (id) => {
+  const g = allGoals.find(x => x.id === id);
+  if (g) openGoalModal(g);
+};
+window.saveGoal = async (id) => {
+  const name = document.getElementById('goal-name').value.trim();
+  const target = parseFloat(document.getElementById('goal-target').value);
+  const current = parseFloat(document.getElementById('goal-current').value)||0;
+  const emoji = document.getElementById('goal-emoji').value;
+  const deadline = document.getElementById('goal-date').value;
+  if (!name || !target) { showToast('Completa nombre y meta'); return; }
+  try {
+    const data = { name, target, current, emoji, deadline, updatedAt: serverTimestamp() };
+    if (id) await updateDoc(doc(getSpaceRef('goals'), id), data);
+    else await addDoc(getSpaceRef('goals'), { ...data, createdAt: serverTimestamp() });
+    closeModal('modal-goal', {target:document.getElementById('modal-goal')});
+    showToast('✅ Meta guardada');
+  } catch(e) { showToast('Error'); console.error(e); }
+};
+window.deleteGoal = async (id) => {
+  if (!confirm('¿Eliminar esta meta?')) return;
+  await deleteDoc(doc(getSpaceRef('goals'), id));
+  closeModal('modal-goal', {target:document.getElementById('modal-goal')});
+  showToast('Meta eliminada');
+};
+
+// ── BUDGET MODAL ──
+window.openBudgetModal = () => {
+  document.getElementById('modal-budget-content').innerHTML = `
+    <div class="modal-title">Nuevo presupuesto</div>
+    <div class="form-group">
+      <label class="form-label">Categoría</label>
+      <div class="category-grid">
+        ${EXPENSE_CATS.map(c=>`<div class="cat-chip" onclick="selectBudgetCat('${c.id}',this)" data-id="${c.id}"><span>${c.icon}</span>${c.label}</div>`).join('')}
+      </div>
+      <input type="hidden" id="budget-cat" value=""/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre (opcional)</label>
+      <input class="form-input" id="budget-name" placeholder="Ej: Comida mensual"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Límite mensual ($)</label>
+      <div class="amount-input-wrap"><span class="currency">$</span>
+        <input class="form-input" id="budget-limit" type="number" placeholder="500"/>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveBudget()">Guardar presupuesto</button>
+  `;
+  openModal('modal-budget');
+};
+window.selectBudgetCat = (id, el) => {
+  document.querySelectorAll('#modal-budget-content .cat-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('budget-cat').value = id;
+};
+window.saveBudget = async () => {
+  const cat = document.getElementById('budget-cat').value;
+  const name = document.getElementById('budget-name').value.trim();
+  const limit = parseFloat(document.getElementById('budget-limit').value);
+  if (!cat || !limit) { showToast('Completa categoría y límite'); return; }
+  await addDoc(getSpaceRef('budgets'), { category: cat, name, limit, createdAt: serverTimestamp() });
+  closeModal('modal-budget', {target:document.getElementById('modal-budget')});
+  showToast('✅ Presupuesto guardado');
+};
+
+// ── SPACES MODAL ──
+window.openSpacesModal = async () => {
+  document.getElementById('modal-spaces-content').innerHTML = `
+    <div class="modal-title">Espacios financieros</div>
+    <div id="spaces-list"><div class="loading" style="min-height:80px">Cargando...</div></div>
+    <div class="divider"></div>
+    <div class="section-title" style="margin-top:0.75rem;margin-bottom:0.75rem">Crear espacio compartido</div>
+    <div class="form-group">
+      <label class="form-label">Nombre</label>
+      <input class="form-input" id="new-space-name" placeholder="Ej: Pareja, Viaje a Colombia..."/>
+    </div>
+    <button class="btn btn-secondary" style="width:100%" onclick="createSharedSpace()">+ Crear espacio</button>
+    <div class="divider"></div>
+    <div class="invite-box">
+      <div class="invite-title">Unirse a un espacio</div>
+      <div class="invite-sub">Ingresa el código de invitación que te compartieron</div>
+      <div style="display:flex;gap:0.5rem">
+        <input class="form-input" id="join-code" placeholder="Código de invitación" style="flex:1"/>
+        <button class="btn btn-secondary btn-sm" onclick="joinSpace()">Unirse</button>
+      </div>
+    </div>
+  `;
+  openModal('modal-spaces');
+  // Render spaces list
+  const list = document.getElementById('spaces-list');
+  list.innerHTML = Object.values(spaceData).map(s => `
+    <div class="space-item ${s.id===currentSpaceId?'current':''}" onclick="switchSpace('${s.id}')">
+      <div class="space-dot" style="background:${s.color||'#6ee7b7'}"></div>
+      <div class="space-info">
+        <div class="space-name">${s.name}</div>
+        <div class="space-role">${s.source==='shared'?'Compartido':'Personal'} · ${s.role||'owner'==='owner'?'Propietario':'Miembro'}</div>
+      </div>
+      ${s.id===currentSpaceId?'<span style="color:var(--accent);font-size:0.8rem">✓ Activo</span>':''}
+    </div>
+  `).join('');
+};
+
+window.switchSpace = (id) => {
+  currentSpaceId = id;
+  currentSpaceName = spaceData[id]?.name || 'Personal';
+  document.getElementById('current-space-label').textContent = currentSpaceName;
+  closeModal('modal-spaces', {target:document.getElementById('modal-spaces')});
+  subscribeData();
+  showToast(`Espacio: ${currentSpaceName}`);
+};
+
+window.createSharedSpace = async () => {
+  const name = document.getElementById('new-space-name').value.trim();
+  if (!name) { showToast('Ingresa un nombre'); return; }
+  const colors = ['#818cf8','#f472b6','#fb923c','#60a5fa','#fbbf24'];
+  const color = colors[Math.floor(Math.random()*colors.length)];
+  const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const ref = doc(collection(db, 'sharedSpaces'));
+  await setDoc(ref, {
+    name, color, type:'shared', owner: currentUser.uid,
+    members: [currentUser.uid], inviteCode: code,
+    balance: 0, currency: 'USD', createdAt: serverTimestamp()
+  });
+  spaceData[ref.id] = { id: ref.id, name, color, type:'shared', source:'shared', role:'owner', inviteCode: code, balance:0 };
+  await openSpacesModal();
+  showToast(`✅ Espacio "${name}" creado · Código: ${code}`);
+};
+
+window.joinSpace = async () => {
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  if (!code) return;
+  const q = query(collection(db, 'sharedSpaces'), where('inviteCode', '==', code));
+  const snap = await getDocs(q);
+  if (snap.empty) { showToast('Código no encontrado'); return; }
+  const spDoc = snap.docs[0];
+  const members = spDoc.data().members || [];
+  if (members.includes(currentUser.uid)) { showToast('Ya eres miembro de este espacio'); return; }
+  await updateDoc(doc(db, 'sharedSpaces', spDoc.id), { members: [...members, currentUser.uid] });
+  spaceData[spDoc.id] = { id: spDoc.id, ...spDoc.data(), source:'shared', role:'member' };
+  switchSpace(spDoc.id);
+  showToast(`✅ Te uniste a "${spDoc.data().name}"`);
+};
+
+// ── ADJUST BALANCE MODAL ──
+window.openAdjustModal = () => {
+  const sp = spaceData[currentSpaceId] || {};
+  document.getElementById('modal-adjust-content').innerHTML = `
+    <div class="modal-title">Ajustar saldo</div>
+    <p class="text-sm text-muted" style="margin-bottom:1rem">Actualiza el saldo real de tu cuenta sin registrar una transacción.</p>
+    <div class="form-group">
+      <label class="form-label">Saldo actual</label>
+      <div class="amount-input-wrap"><span class="currency">$</span>
+        <input class="form-input" id="adjust-balance" type="number" step="0.01" value="${sp.balance||0}"/>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="saveAdjust()">Actualizar saldo</button>
+  `;
+  openModal('modal-adjust');
+};
+window.saveAdjust = async () => {
+  const bal = parseFloat(document.getElementById('adjust-balance').value);
+  if (isNaN(bal)) { showToast('Monto inválido'); return; }
+  await updateDoc(getSpaceDocRef(), { balance: bal });
+  spaceData[currentSpaceId] = { ...spaceData[currentSpaceId], balance: bal };
+  closeModal('modal-adjust', {target:document.getElementById('modal-adjust')});
+  refreshCurrentView();
+  showToast('✅ Saldo actualizado');
+};
+
+// ── PROFILE MODAL ──
+window.openProfileModal = () => {
+  const u = currentUser;
+  document.getElementById('modal-profile-content').innerHTML = `
+    <div class="modal-title">Mi perfil</div>
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem">
+      <div class="avatar" style="width:52px;height:52px;font-size:1.1rem">
+        ${u.photoURL ? `<img src="${u.photoURL}" alt="avatar"/>` : (u.displayName||'U')[0].toUpperCase()}
+      </div>
+      <div>
+        <div style="font-family:var(--font-display);font-weight:700">${u.displayName||'Usuario'}</div>
+        <div class="text-sm text-muted">${u.email}</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="margin-top:1rem">
+      <div class="summary-row"><span class="label">Espacios activos</span><span class="value">${Object.keys(spaceData).length}</span></div>
+      <div class="summary-row"><span class="label">Total transacciones</span><span class="value">${allTx.length}</span></div>
+      <div class="summary-row"><span class="label">Metas creadas</span><span class="value">${allGoals.length}</span></div>
+    </div>
+    <div class="divider"></div>
+    <button class="btn btn-danger" style="width:100%;margin-top:1rem" onclick="doSignOut()">Cerrar sesión</button>
+  `;
+  openModal('modal-profile');
+};
+
+</script>
+</body>
+</html>
